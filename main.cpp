@@ -1,31 +1,24 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+const int SCREEN_WIDTH = 640;
+const int SCREEN_HEIGHT = 400;
 
 int main(int argc, char* argv[]) {
-	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_Window* window = nullptr;
+	SDL_Renderer* renderer = nullptr;
 
-	SDL_Window* window = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, 0, &window, &renderer);
 
-	if(window == NULL) {
-		std::cout << "Window could not be created! SDL_Error: " << SDL_GetError() << std::endl;
-		return 1;
-	}
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
 
-	SDL_Event windowEvent;
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderDrawPoint(renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-	while(true) {
-		if(SDL_PollEvent(&windowEvent)) {
-			if(windowEvent.type == SDL_QUIT) {
-				break;
-			}
-		}
-	}
-
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	SDL_RenderPresent(renderer);
+	SDL_Delay(10000);
 
 	return EXIT_SUCCESS;
 }

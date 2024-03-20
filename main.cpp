@@ -1,5 +1,6 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <AquIce/PixelMap2d.hpp>
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 400;
@@ -14,9 +15,10 @@ int main(int argc, char* argv[]) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderDrawPoint(renderer, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	
+	Pixel pixel;
+	set_pixel(&pixel, 255, 255, 255, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+	draw_pixel(renderer, &pixel);
 
 	SDL_RenderPresent(renderer);
 

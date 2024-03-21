@@ -1,7 +1,7 @@
 #ifndef __AQUICE_PIXEL_H__
 #define __AQUICE_PIXEL_H__
 
-#include "../SDL2/SDL.h"
+#include "../../SDL2/SDL.h"
 
 typedef struct Pixel
 {
@@ -47,6 +47,34 @@ void set_pixel(Pixel* pixel, int r, int g, int b) {
 	pixel->a = 255;
 	pixel->x = 0;
 	pixel->y = 0;
+}
+
+Pixel* Pixel_new(int r, int g, int b, int a, int x, int y) {
+	Pixel* pixel = (Pixel*)malloc(sizeof(Pixel));
+	set_pixel(pixel, r, g, b, a, x, y);
+	return pixel;
+}
+
+Pixel* Pixel_new(int r, int g, int b, int a) {
+	Pixel* pixel = (Pixel*)malloc(sizeof(Pixel));
+	set_pixel(pixel, r, g, b, a);
+	return pixel;
+}
+
+Pixel* Pixel_new(int r, int g, int b, int x, int y) {
+	Pixel* pixel = (Pixel*)malloc(sizeof(Pixel));
+	set_pixel(pixel, r, g, b, x, y);
+	return pixel;
+}
+
+Pixel* Pixel_new(int r, int g, int b) {
+	Pixel* pixel = (Pixel*)malloc(sizeof(Pixel));
+	set_pixel(pixel, r, g, b);
+	return pixel;
+}
+
+void DestroyPixel(Pixel* pixel) {
+	free(pixel);
 }
 
 void draw_pixel(SDL_Renderer* renderer, Pixel* pixel) {

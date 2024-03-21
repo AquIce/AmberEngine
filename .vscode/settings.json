@@ -1,7 +1,0 @@
-{
-	"files.associations": {
-		"*.h": "c",
-		"*.json": "jsonc",
-		"vector": "cpp"
-	}
-}

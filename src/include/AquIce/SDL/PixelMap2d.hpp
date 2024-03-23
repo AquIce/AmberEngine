@@ -40,6 +40,11 @@ void set_pixel_map_2d(PixelMap2d* pixel_map_2d, PixelMap* pixel_map, int length)
 	}
 }
 
+void set_pixel_map_2d(PixelMap2d* pixel_map_2d, int start_x, int start_y) {
+	pixel_map_2d->start_x = start_x;
+	pixel_map_2d->start_y = start_y;
+}
+
 PixelMap2d* PixelMap2d_new(std::vector<PixelMap*>* pixel_maps, int start_x, int start_y) {
 	PixelMap2d* pixel_map_2d = (PixelMap2d*)malloc(sizeof(PixelMap2d));
 	set_pixel_map_2d(pixel_map_2d, start_x, start_y, pixel_maps);

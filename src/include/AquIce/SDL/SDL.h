@@ -3,4 +3,54 @@
 
 #include "../../SDL2/SDL.h"
 
+typedef struct AquIce_SDL_Config {
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+	bool running;
+	int scale;
+} AquIce_SDL_Config;
+
+AquIce_SDL_Config AquIce_SDL_Setup(const char* title, int width, int height, int scale) {
+	SDL_Init(SDL_INIT_EVERYTHING);
+	auto window = SDL_CreateWindow(
+		title,
+		SDL_WINDOWPOS_CENTERED,
+		SDL_WINDOWPOS_CENTERED,
+		width,
+		height,
+		0
+	);
+	// Create a renderer
+	auto renderer = SDL_CreateRenderer(
+		window,
+		-1,
+		0
+	);
+	return {
+		window,
+		renderer,
+		true,
+		scale
+	};
+}
+
+void AquIce_SDL_SetScale(AquIce_SDL_Config* config) {
+	SDL_RenderSetScale(
+		config->renderer,
+		config->scale,
+		config->scale
+	);
+}
+
+void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b, int a) {
+	SDL_SetRenderDrawColor(renderer, r, g, b, a);
+	SDL_RenderClear(renderer);
+}
+void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b) {
+	AquIce_SDL_ClearRenderer(renderer, r, g, b, 255);
+}
+void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer) {
+	AquIce_SDL_ClearRenderer(renderer, 0, 0, 0);
+}
+
 #endif

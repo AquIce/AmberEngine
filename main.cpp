@@ -1,85 +1,113 @@
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <AquIce/SDL/PixelMap2d.hpp>
+#include <vector>
+#include <algorithm>
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 400;
+#include <SDL2/SDL.h>
+#include <AquIce/SDL/SDL.h>
+
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 1000;
+
+const int TEXTURE_WIDTH = 2000;
+const int TEXTURE_HEIGHT = 2000;
 
 int main(int argc, char* argv[]) {
-	SDL_Window* window = nullptr;
-	SDL_Renderer* renderer = nullptr;
+	// Initialize SDL
+	auto config = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+	
+	// Create an event
 	SDL_Event event;
 
-	SDL_Init(SDL_INIT_VIDEO);
-	SDL_CreateWindowAndRenderer(SCREEN_WIDTH * 2, SCREEN_HEIGHT * 2, 0, &window, &renderer);
+	SDL_Rect source{0, 0, SCREEN_WIDTH / 32, SCREEN_HEIGHT / 32};
+	SDL_Rect dest{10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20};
 
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-
-	SDL_RenderSetScale(renderer, 50, 50);
-
-	PixelMap2d* pixel_map_2d = PixelMap2d_new(
-		new std::vector<PixelMap*>(
-			{
-				PixelMap_new(
-					new std::vector<Pixel*>(
-						{
-							Pixel_new(255, 0, 0, 255, 0, 0),
-							Pixel_new(0, 255, 0, 255, 1, 0),
-							Pixel_new(0, 0, 255, 255, 2, 0),
-							Pixel_new(255, 255, 0, 255, 3, 0),
-							Pixel_new(255, 0, 255, 255, 4, 0),
-							Pixel_new(0, 255, 255, 255, 5, 0),
-							Pixel_new(0, 0, 0, 255, 7, 0),
-							Pixel_new(255, 255, 255, 255, 6, 0),
-						}
-					)
-				),
-				PixelMap_new(
-					new std::vector<Pixel*>(
-						{
-							Pixel_new(0, 0, 0, 255, 7, 1),
-							Pixel_new(255, 0, 0, 255, 0, 1),
-							Pixel_new(255, 255, 0, 255, 3, 1),
-							Pixel_new(0, 0, 255, 255, 2, 1),
-							Pixel_new(0, 255, 255, 255, 5, 1),
-							Pixel_new(255, 0, 255, 255, 4, 1),
-							Pixel_new(0, 255, 0, 255, 1, 1),
-							Pixel_new(255, 255, 255, 255, 6, 1),
-						}
-					)
-				),
-				PixelMap_new(
-					new std::vector<Pixel*>(
-						{
-							Pixel_new(255, 255, 0, 255, 3, 2),
-							Pixel_new(255, 255, 255, 255, 6, 2),
-							Pixel_new(0, 255, 0, 255, 1, 2),
-							Pixel_new(255, 0, 255, 255, 4, 2),
-							Pixel_new(0, 0, 255, 255, 2, 2),
-							Pixel_new(0, 0, 0, 255, 7, 2),
-							Pixel_new(0, 255, 255, 255, 5, 2),
-							Pixel_new(255, 0, 0, 255, 0, 2),
-						}
-					)
-				),
-			}
-		)
+	// Create a texture
+	SDL_Texture* texture = SDL_CreateTexture(
+		config.renderer,
+		SDL_PIXELFORMAT_RGBA8888,
+		SDL_TEXTUREACCESS_TARGET,
+		TEXTURE_WIDTH,
+		TEXTURE_HEIGHT
 	);
-	
-	draw_pixel_map_2d(renderer, pixel_map_2d);
 
-	SDL_RenderPresent(renderer);
-
-	while(true) {
-		if(SDL_PollEvent(&event)) {
-			if(event.type == SDL_QUIT) {
-				break;
-			}
-		}
+	std::vector<SDL_Point> points;
+	for(int i = 0; i < 10000; i++) {
+		points.push_back({
+			rand() % TEXTURE_HEIGHT,
+			rand() % TEXTURE_WIDTH
+	});
 	}
 
-	DestroyPixelMap2d(pixel_map_2d);
+	// Program loop
+	while(config.running) {
+		// Handle events
+		while(SDL_PollEvent(&event)) {
+			switch(event.type) {
+				case SDL_QUIT: // App Quit
+					config.running = false;
+					break;
+				case SDL_KEYDOWN: // Key Press
+					switch(event.key.keysym.sym) {
+						case SDLK_UP:
+							source.y -= 3;
+							break;
+						case SDLK_DOWN:
+							source.y += 3;
+							break;
+						case SDLK_LEFT:
+							source.y -= 3;
+							break;
+						case SDLK_RIGHT:
+							source.y += 3;
+							break;
+						case SDLK_1:
+							source.w *= 2;
+							source.h *= 2;
+							break;
+						case SDLK_2:
+							source.w /= 2;
+							source.h /= 2;
+							break;
+					}
+					break;
+				case SDL_MOUSEWHEEL: // Mouse Wheel
+					config.scale += event.wheel.y > 0 ? 1 : -1;
+			}
+		}
+
+		// Set render scale (zoom)
+		AquIce_SDL_SetScale(&config);
+
+		// Clear screen
+		AquIce_SDL_ClearRenderer(config.renderer);
+
+		// Clear the texture
+		SDL_SetRenderTarget(config.renderer, texture);
+		SDL_SetRenderDrawColor(config.renderer, 255, 255, 255, 255);
+		SDL_RenderClear(config.renderer);
+
+		// Move position of dots
+		std::for_each(points.begin(), points.end(), [](auto& item) {
+			item.x += rand() % 3 - 1;
+			item.y += rand() % 3 - 1;
+		});
+
+		// Draw dots to texture
+		SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
+		SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
+
+		// Set back render target to window (nullptr -> default)
+		SDL_SetRenderTarget(config.renderer, nullptr);
+
+		// Render texture
+		SDL_RenderClear(config.renderer);
+		SDL_RenderCopy(config.renderer, texture, &source, &dest);
+
+		// Present renderer
+		SDL_RenderPresent(config.renderer);
+
+		SDL_Delay(50);
+	}
 
 	return EXIT_SUCCESS;
 }

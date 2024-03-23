@@ -1,5 +1,5 @@
-#ifndef __AQUICE_PIXELMAP_H__
-#define __AQUICE_PIXELMAP_H__
+#ifndef __AQUICE_SDL2_PIXELMAP_HPP__
+#define __AQUICE_SDL2_PIXELMAP_HPP__
 
 #include "Pixel.h"
 #include <vector>

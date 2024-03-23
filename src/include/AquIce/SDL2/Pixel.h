@@ -1,5 +1,5 @@
-#ifndef __AQUICE_PIXEL_H__
-#define __AQUICE_PIXEL_H__
+#ifndef __AQUICE_SDL2_PIXEL_H__
+#define __AQUICE_SDL2_PIXEL_H__
 
 #include "../../SDL2/SDL.h"
 

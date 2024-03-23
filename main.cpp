@@ -3,7 +3,8 @@
 #include <algorithm>
 
 #include <SDL2/SDL.h>
-#include <AquIce/SDL/SDL.h>
+#include <AquIce/SDL2/SDL.h>
+#include <AquIce/SDL3/PseudoCube.hpp>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
@@ -93,8 +94,11 @@ int main(int argc, char* argv[]) {
 		});
 
 		// Draw dots to texture
-		SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
-		SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
+		//SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
+		//SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
+		draw_line(config.renderer, {0, 0}, {70, 200});
+		draw_line(config.renderer, {70, 200}, {130, 20});
+		draw_line(config.renderer, {130, 20}, {0, 0});
 
 		// Set back render target to window (nullptr -> default)
 		SDL_SetRenderTarget(config.renderer, nullptr);

@@ -11,12 +11,11 @@
 #define P_ANGLE 30
 
 typedef struct Cube {
-	std::vector<line> lines;
+	std::vector<coords> vertices;
 	int r;
 	int g;
 	int b;
 	int a;
-	coords base_coords;
 } Cube;
 
 typedef struct SDL3_Config {
@@ -42,57 +41,69 @@ SDL3_Config SDL3_Config_new(int size) {
 	};
 }
 
-void add_cube(SDL3_Config* config, coords base_coords, int r, int g, int b, int a) {
-	coords center_middle = {
-		base_coords.x,
-		base_coords.y - config->hypsize
+void add_cube(SDL3_Config* config, coords front_down, int r, int g, int b, int a) {
+	coords back_down = {
+		front_down.x,
+		front_down.y - config->oppsize * 2
 	};
-	coords top_middle = {
-		base_coords.x,
-		base_coords.y - config->hypsize - config->oppsize * 2
+	coords left_down = {
+		front_down.x + config->adjsize,
+		front_down.y - config->oppsize
 	};
-	coords top_left = {
-		base_coords.x + config->adjsize,
-		base_coords.y - config->hypsize - config->oppsize
+	coords right_down = {
+		front_down.x - config->adjsize,
+		front_down.y - config->oppsize
 	};
-	coords top_right = {
-		base_coords.x - config->adjsize,
-		base_coords.y - config->hypsize - config->oppsize
+	coords front_up = {
+		front_down.x,
+		front_down.y - config->hypsize
 	};
-	coords bottom_left = {
-		base_coords.x + config->adjsize,
-		base_coords.y - config->oppsize
+	coords back_up = {
+		front_down.x,
+		front_down.y - config->hypsize - config->oppsize * 2
 	};
-	coords bottom_right = {
-		base_coords.x - config->adjsize,
-		base_coords.y - config->oppsize
+	coords left_up = {
+		front_down.x + config->adjsize,
+		front_down.y - config->hypsize - config->oppsize
+	};
+	coords right_up = {
+		front_down.x - config->adjsize,
+		front_down.y - config->hypsize - config->oppsize
 	};
 	config->objects.push_back(
 		{
-			std::vector<line>({
-				linegen(base_coords, center_middle),
-				linegen(base_coords, bottom_left),
-				linegen(base_coords, bottom_right),
-				linegen(bottom_left, top_left),
-				linegen(bottom_right, top_right),
-				linegen(center_middle, top_left),
-				linegen(center_middle, top_right),
-				linegen(top_left, top_middle),
-				linegen(top_right, top_middle)
+			std::vector<coords>({
+				front_down,
+				back_down,
+				left_down,
+				right_down,
+				front_up,
+				back_up,
+				left_up,
+				right_up
 			}),
 			r,
 			g,
 			b,
-			a,
-			base_coords
-		}
+			a		}
 	);
+}
+
+void draw_objects_vertices(SDL_Renderer* renderer, SDL3_Config* config) {
+	for(auto cube : config->objects) {
+		for(auto v : cube.vertices) {
+			SDL_SetRenderDrawColor(renderer, cube.r, cube.g, cube.b, cube.a);
+			SDL_RenderDrawPoint(renderer, v.x, v.y);
+		}
+	}
 }
 
 void draw_objects(SDL_Renderer* renderer, SDL3_Config* config) {
 	for(auto cube : config->objects) {
-		for (auto ln : cube.lines) {
-			draw_line(renderer, ln.start, ln.end, cube.r, cube.g, cube.b, cube.a);
+		// TODO: Add notion of visible lines to avoid rendering all lines
+		for(auto p : cube.vertices) {
+			SDL_SetRenderDrawColor(renderer, cube.r, cube.g, cube.b, cube.a);
+			SDL_RenderDrawPoint(renderer, p.x, p.y);
 		}
 	}
 }

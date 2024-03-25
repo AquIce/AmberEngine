@@ -42,9 +42,9 @@ int main(int argc, char* argv[]) {
 	SDL3_Config cfg = SDL3_Config_new(100);
 
 	add_cube(&cfg, {200, 200}, 0, 0, 0, 255);
-	add_cube(&cfg, {200, 300}, 0, 0, 0, 255);
-	add_cube(&cfg, {200 + cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
-	add_cube(&cfg, {200 - cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
+	//add_cube(&cfg, {200, 300}, 0, 0, 0, 255);
+	//add_cube(&cfg, {200 + cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
+	//add_cube(&cfg, {200 - cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
 
 	// Program loop
 	while(config.running) {

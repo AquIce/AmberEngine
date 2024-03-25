@@ -4,7 +4,7 @@
 #include <math.h>
 
 int iround(double value) {
-	return value;
+	return (int)round(value);
 }
 
 #endif

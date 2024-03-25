@@ -14,7 +14,8 @@ const int TEXTURE_HEIGHT = 2000;
 
 int main(int argc, char* argv[]) {
 	// Initialize SDL
-	auto config = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+	auto config2 = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+	auto config3 = SDL3_Config_new(100);
 	
 	// Create an event
 	SDL_Event event;
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
 
 	// Create a texture
 	SDL_Texture* texture = SDL_CreateTexture(
-		config.renderer,
+		config2.renderer,
 		SDL_PIXELFORMAT_RGBA8888,
 		SDL_TEXTUREACCESS_TARGET,
 		TEXTURE_WIDTH,
@@ -39,20 +40,18 @@ int main(int argc, char* argv[]) {
 		});
 	}
 
-	SDL3_Config cfg = SDL3_Config_new(100);
-
-	add_cube(&cfg, {200, 200}, 0, 0, 0, 255);
-	//add_cube(&cfg, {200, 300}, 0, 0, 0, 255);
-	//add_cube(&cfg, {200 + cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
-	//add_cube(&cfg, {200 - cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
+	add_cube(&config3, {200, 200}, 0, 0, 0, 255);
+	//add_cube(&config3, {200, 300}, 0, 0, 0, 255);
+	//add_cube(&config3, {200 + config3.adjsize, 300 + config3.oppsize}, 0, 0, 0, 255);
+	//add_cube(&config3, {200 - config3.adjsize, 300 + config3.oppsize}, 0, 0, 0, 255);
 
 	// Program loop
-	while(config.running) {
+	while(config2.running) {
 		// Handle events
 		while(SDL_PollEvent(&event)) {
 			switch(event.type) {
 				case SDL_QUIT: // App Quit
-					config.running = false;
+					config2.running = false;
 					break;
 				case SDL_KEYDOWN: // Key Press
 					switch(event.key.keysym.sym) {
@@ -79,20 +78,20 @@ int main(int argc, char* argv[]) {
 					}
 					break;
 				case SDL_MOUSEWHEEL: // Mouse Wheel
-					config.scale += event.wheel.y > 0 ? 1 : -1;
+					config2.scale += event.wheel.y > 0 ? 1 : -1;
 			}
 		}
 
 		// Set render scale (zoom)
-		AquIce_SDL_SetScale(&config);
+		AquIce_SDL_SetScale(&config2);
 
 		// Clear screen
-		AquIce_SDL_ClearRenderer(config.renderer);
+		AquIce_SDL_ClearRenderer(config2.renderer);
 
 		// Clear the texture
-		SDL_SetRenderTarget(config.renderer, texture);
-		SDL_SetRenderDrawColor(config.renderer, 255, 255, 255, 255);
-		SDL_RenderClear(config.renderer);
+		SDL_SetRenderTarget(config2.renderer, texture);
+		SDL_SetRenderDrawColor(config2.renderer, 255, 255, 255, 255);
+		SDL_RenderClear(config2.renderer);
 
 		// Move position of dots
 		std::for_each(points.begin(), points.end(), [](auto& item) {
@@ -103,17 +102,17 @@ int main(int argc, char* argv[]) {
 		// Draw dots to texture
 		//SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
 		//SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
-		draw_objects(config.renderer, &cfg);
+		draw_objects(config2.renderer, &config3);
 
 		// Set back render target to window (nullptr -> default)
-		SDL_SetRenderTarget(config.renderer, nullptr);
+		SDL_SetRenderTarget(config2.renderer, nullptr);
 
 		// Render texture
-		SDL_RenderClear(config.renderer);
-		SDL_RenderCopy(config.renderer, texture, &source, &dest);
+		SDL_RenderClear(config2.renderer);
+		SDL_RenderCopy(config2.renderer, texture, &source, &dest);
 
 		// Present renderer
-		SDL_RenderPresent(config.renderer);
+		SDL_RenderPresent(config2.renderer);
 
 		SDL_Delay(50);
 	}

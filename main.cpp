@@ -4,7 +4,7 @@
 
 #include <SDL2/SDL.h>
 #include <AquIce/SDL2/SDL.h>
-#include <AquIce/SDL3/PseudoCube.hpp>
+#include <AquIce/SDL3/SDL.hpp>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 1000;
@@ -36,8 +36,15 @@ int main(int argc, char* argv[]) {
 		points.push_back({
 			rand() % TEXTURE_HEIGHT,
 			rand() % TEXTURE_WIDTH
-	});
+		});
 	}
+
+	SDL3_Config cfg = SDL3_Config_new(100);
+
+	add_cube(&cfg, {200, 200}, 0, 0, 0, 255);
+	add_cube(&cfg, {200, 300}, 0, 0, 0, 255);
+	add_cube(&cfg, {200 + cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
+	add_cube(&cfg, {200 - cfg.adjsize, 300 + cfg.oppsize}, 0, 0, 0, 255);
 
 	// Program loop
 	while(config.running) {
@@ -96,9 +103,7 @@ int main(int argc, char* argv[]) {
 		// Draw dots to texture
 		//SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
 		//SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
-		draw_line(config.renderer, {0, 0}, {70, 200});
-		draw_line(config.renderer, {70, 200}, {130, 20});
-		draw_line(config.renderer, {130, 20}, {0, 0});
+		draw_objects(config.renderer, &cfg);
 
 		// Set back render target to window (nullptr -> default)
 		SDL_SetRenderTarget(config.renderer, nullptr);

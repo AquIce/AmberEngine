@@ -9,9 +9,19 @@ typedef struct coords {
 	int y;
 } coords;
 
-std::vector<coords> linegen(coords start, coords end) {
+typedef struct line {
+	coords start;
+	coords end;
+	std::vector<coords> line_vec;
+} line;
 
-	std::vector<coords> coords_vec = std::vector<coords>();
+line linegen(coords start, coords end) {
+
+	line ln = {
+		start,
+		end,
+		std::vector<coords>()
+	};
 
 	int x, y;
 	int dx = end.x - start.x;
@@ -33,7 +43,7 @@ std::vector<coords> linegen(coords start, coords end) {
 			y = end.y;
 			xe = start.x;
 		}
-		coords_vec.push_back({x, y});
+		ln.line_vec.push_back({x, y});
 		for (i = 0; x < xe; i++) {
 			x = x + 1;
 			if (px < 0) {
@@ -46,7 +56,7 @@ std::vector<coords> linegen(coords start, coords end) {
 				}
 				px = px + 2 * (dy1 - dx1);
 			}
-			coords_vec.push_back({x, y});
+			ln.line_vec.push_back({x, y});
 		}
 	} else {
 		if (dy >= 0) {
@@ -58,7 +68,7 @@ std::vector<coords> linegen(coords start, coords end) {
 			y = end.y;
 			ye = start.y;
 		}
-		coords_vec.push_back({x, y});
+		ln.line_vec.push_back({x, y});
 		for (i = 0; y < ye; i++) {
 			y = y + 1;
 			if (py <= 0) {
@@ -71,11 +81,11 @@ std::vector<coords> linegen(coords start, coords end) {
 				}
 				py = py + 2 * (dx1 - dy1);
 			}
-			coords_vec.push_back({x, y});
+			ln.line_vec.push_back({x, y});
 		}
 	}
 
-	return coords_vec;
+	return ln;
 }
 
 #endif

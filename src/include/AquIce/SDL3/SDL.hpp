@@ -17,6 +17,24 @@
 #define P_ANGLE 30
 
 /**
+ * @brief A struct to represent a 3D point
+*/
+typedef struct coords3 {
+	/**
+	 * @brief The x coordinate
+	*/
+	int x;
+	/**
+	 * @brief The y coordinate
+	*/
+	int y;
+	/**
+	 * @brief The z coordinate
+	*/
+	int z;
+} coords3;
+
+/**
  * @brief A struct to represent a 2D point
 */
 typedef struct Cube {
@@ -62,6 +80,10 @@ typedef struct SDL3_Config {
 	 * @brief The objects to render
 	*/
 	std::vector<Cube> objects;
+	/**
+	 * @brief The origin of the SDL3 configuration
+	*/
+	coords origin;
 } SDL3_Config;
 
 /**
@@ -88,13 +110,33 @@ double dtrig(double (*trig_fn)(double), double radangle) {
  * @param size The size of the cube
  * @return The SDL3 configuration
 */
-SDL3_Config SDL3_Config_new(int size) {
+SDL3_Config SDL3_Config_new(coords origin, int size) {
 	return {
 		size,
 		iround(size * dtrig(cos, 90 - P_ANGLE)),
-		iround(size * dtrig(sin, 90 - P_ANGLE))
+		iround(size * dtrig(sin, 90 - P_ANGLE)),
+		std::vector<Cube>(),
+		origin
 	};
 }
+
+coords get_2d_coords(coords3 p, SDL3_Config* config) {
+	coords p2 = {
+		config->origin.x,
+		config->origin.y
+	};
+	// z axis
+	p2.y -= p.z * config->hypsize;
+	// x axis
+	p2.x += p.x * config->adjsize;
+	p2.y -= p.x * config->oppsize;
+	// y axis
+	p2.x += p.y * config->adjsize;
+	p2.y += p.y * config->oppsize;
+
+	return p2;
+}
+
 
 /**
  * @brief Add a cube to the SDL3 configuration
@@ -149,8 +191,13 @@ void add_cube(SDL3_Config* config, coords front_down, int r, int g, int b, int a
 			r,
 			g,
 			b,
-			a		}
+			a
+		}
 	);
+}
+
+void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a) {
+	add_cube(config, get_2d_coords(position, config), r, g, b, a);
 }
 
 /**
@@ -175,9 +222,22 @@ void draw_objects_vertices(SDL_Renderer* renderer, SDL3_Config* config) {
 void draw_objects(SDL_Renderer* renderer, SDL3_Config* config) {
 	for(auto cube : config->objects) {
 		// TODO: Add notion of visible lines to avoid rendering all lines
-		for(auto p : cube.vertices) {
-			SDL_SetRenderDrawColor(renderer, cube.r, cube.g, cube.b, cube.a);
-			SDL_RenderDrawPoint(renderer, p.x, p.y);
+		std::vector<line> lines = {
+			{cube.vertices[0], cube.vertices[2]},
+			{cube.vertices[0], cube.vertices[3]},
+
+			{cube.vertices[0], cube.vertices[4]},
+			{cube.vertices[2], cube.vertices[6]},
+			{cube.vertices[3], cube.vertices[7]},
+
+			{cube.vertices[4], cube.vertices[6]},
+			{cube.vertices[4], cube.vertices[7]},
+			{cube.vertices[5], cube.vertices[6]},
+			{cube.vertices[5], cube.vertices[7]},
+			
+		};
+		for(auto line : lines) {
+			draw_line(renderer, line.start, line.end);
 		}
 	}
 }

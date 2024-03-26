@@ -15,7 +15,7 @@ const int TEXTURE_HEIGHT = 2000;
 int main(int argc, char* argv[]) {
 	// Initialize SDL
 	auto config2 = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
-	auto config3 = SDL3_Config_new(100);
+	auto config3 = SDL3_Config_new({500, 500}, 100);
 	
 	// Create an event
 	SDL_Event event;
@@ -40,10 +40,10 @@ int main(int argc, char* argv[]) {
 		});
 	}
 
-	add_cube(&config3, {200, 200}, 0, 0, 0, 255);
-	//add_cube(&config3, {200, 300}, 0, 0, 0, 255);
-	//add_cube(&config3, {200 + config3.adjsize, 300 + config3.oppsize}, 0, 0, 0, 255);
-	//add_cube(&config3, {200 - config3.adjsize, 300 + config3.oppsize}, 0, 0, 0, 255);
+	add_cube(&config3, {0, 0, 0}, 0, 0, 0, 255);
+	add_cube(&config3, {-1, 0, 0}, 0, 0, 0, 255);
+	add_cube(&config3, {0, 1, 0}, 0, 0, 0, 255);
+	add_cube(&config3, {0, 0, 1}, 0, 0, 0, 255);
 
 	// Program loop
 	while(config2.running) {

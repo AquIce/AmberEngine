@@ -15,6 +15,10 @@
  * @brief The angle for the perspective
 */
 #define P_ANGLE 30
+/**
+ * @brief The vector from the scene to the camera (to calculate hidden mesh points)
+*/
+#define SCENE_TO_CAM_VEC std::vector<int>({-1, 1, 1})
 
 /**
  * @brief A struct to represent a 3D point
@@ -236,6 +240,52 @@ std::vector<MeshPoint> get_cube_mesh_points(Cube cube) {
 		MeshPoint_new({cube.pos.x + 1, cube.pos.y - 1, cube.pos.z}),
 		MeshPoint_new({cube.pos.x + 1, cube.pos.y - 1, cube.pos.z + 1})
 	}};
+}
+
+std::vector<MeshPoint> get_objects_mesh_points(SDL3_Config* config) {
+	std::vector<MeshPoint> mesh_points = std::vector<MeshPoint>();
+	for(auto cube : config->objects) {
+		std::vector<MeshPoint> cube_mesh_points = get_cube_mesh_points(cube);
+		mesh_points.insert(mesh_points.end(), cube_mesh_points.begin(), cube_mesh_points.end());
+	}
+	return mesh_points;
+}
+
+double vector_multiplicity(coords3 reference, coords3 comparee, bool* is_multiple) {
+	double x = (double)(comparee.x - reference.x) / SCENE_TO_CAM_VEC[0];
+	double y = (double)(comparee.y - reference.y) / SCENE_TO_CAM_VEC[1];
+	double z = (double)(comparee.z - reference.z) / SCENE_TO_CAM_VEC[2];
+	*is_multiple = x == y && y == z;
+	return x;
+}
+
+void define_mesh_points_visibility(std::vector<MeshPoint> mesh_points) {
+	std::vector<MeshPoint> mesh_points_sorted = std::vector<MeshPoint>();
+	mesh_points_sorted.push_back({mesh_points[0]});
+	for(auto mpoint : mesh_points) {
+		bool is_inserted = false;
+		for(int i = 0; i < mesh_points_sorted.size(); i++) {
+			MeshPoint ref_mpoint = mesh_points_sorted[i];
+			bool is_multiple;
+			double vmultiple = vector_multiplicity(ref_mpoint.point, mpoint.point, &is_multiple);
+			if(is_multiple) {
+				if(vector_multiplicity(ref_mpoint.point, mpoint.point, &is_multiple) < 0) {
+					mpoint.visible = false;
+				} else {
+					mpoint.visible = true;
+					ref_mpoint.visible = false;
+					mesh_points_sorted[i] = mpoint;
+				}
+
+			}
+		}
+		if(!is_inserted) {
+			mesh_points_sorted.push_back(mpoint);
+		}
+	}
+	for(auto mpoints : mesh_points_sorted) {
+		std::cout << mpoints.point.x << ", " << mpoints.point.y << ", " << mpoints.point.z << " - " << mpoints.visible << std::endl;
+	}
 }
 
 /**

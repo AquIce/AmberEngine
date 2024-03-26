@@ -15,11 +15,12 @@ const int TEXTURE_HEIGHT = 2000;
 int main(int argc, char* argv[]) {
 	// Initialize SDL
 	auto config2 = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
-	auto config3 = SDL3_Config_new({500, 500}, 100);
+	auto config3 = SDL3_Config_new({200, 300}, 100);
 	
 	// Create an event
 	SDL_Event event;
 
+	// Create source and destination rectangles
 	SDL_Rect source{0, 0, SCREEN_WIDTH / 32, SCREEN_HEIGHT / 32};
 	SDL_Rect dest{10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20};
 
@@ -32,14 +33,7 @@ int main(int argc, char* argv[]) {
 		TEXTURE_HEIGHT
 	);
 
-	std::vector<SDL_Point> points;
-	for(int i = 0; i < 10000; i++) {
-		points.push_back({
-			rand() % TEXTURE_HEIGHT,
-			rand() % TEXTURE_WIDTH
-		});
-	}
-
+	// Add cubes to the 3D config
 	add_cube(&config3, {0, 0, 0}, 0, 0, 0, 255);
 	add_cube(&config3, {-1, 0, 0}, 0, 0, 0, 255);
 	add_cube(&config3, {0, 1, 0}, 0, 0, 0, 255);
@@ -93,15 +87,7 @@ int main(int argc, char* argv[]) {
 		SDL_SetRenderDrawColor(config2.renderer, 255, 255, 255, 255);
 		SDL_RenderClear(config2.renderer);
 
-		// Move position of dots
-		std::for_each(points.begin(), points.end(), [](auto& item) {
-			item.x += rand() % 3 - 1;
-			item.y += rand() % 3 - 1;
-		});
-
-		// Draw dots to texture
-		//SDL_SetRenderDrawColor(config.renderer, 0, 0, 0, 255);
-		//SDL_RenderDrawPoints(config.renderer, points.data(), points.size());
+		// Draw all the objects from the 3D config
 		draw_objects(config2.renderer, &config3);
 
 		// Set back render target to window (nullptr -> default)

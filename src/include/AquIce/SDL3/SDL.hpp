@@ -43,6 +43,10 @@ typedef struct Cube {
 	*/
 	std::vector<coords> vertices;
 	/**
+	 * @brief The position of the cube
+	*/
+	coords3 pos;
+	/**
 	 * @brief The red color of the cube
 	*/
 	int r;
@@ -120,6 +124,12 @@ SDL3_Config SDL3_Config_new(coords origin, int size) {
 	};
 }
 
+/**
+ * @brief Get the 2D coordinates of a 3D point
+ * @param p The 3D point
+ * @param config The SDL3 configuration
+ * @return The 2D coordinates of the 3D point
+*/
 coords get_2d_coords(coords3 p, SDL3_Config* config) {
 	coords p2 = {
 		config->origin.x,
@@ -137,17 +147,17 @@ coords get_2d_coords(coords3 p, SDL3_Config* config) {
 	return p2;
 }
 
-
 /**
  * @brief Add a cube to the SDL3 configuration
  * @param config The SDL3 configuration
- * @param front_down The front down point of the cube
+ * @param position The position of the cube
  * @param r The red color of the cube
  * @param g The green color of the cube
  * @param b The blue color of the cube
  * @param a The alpha color of the cube
 */
-void add_cube(SDL3_Config* config, coords front_down, int r, int g, int b, int a) {
+void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a) {
+	coords front_down = get_2d_coords(position, config);
 	coords back_down = {
 		front_down.x,
 		front_down.y - config->oppsize * 2
@@ -188,6 +198,7 @@ void add_cube(SDL3_Config* config, coords front_down, int r, int g, int b, int a
 				left_up,
 				right_up
 			}),
+			position,
 			r,
 			g,
 			b,
@@ -196,8 +207,22 @@ void add_cube(SDL3_Config* config, coords front_down, int r, int g, int b, int a
 	);
 }
 
-void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a) {
-	add_cube(config, get_2d_coords(position, config), r, g, b, a);
+/**
+ * @brief Get the mesh points of a cube
+ * @param cube The cube
+ * @return The mesh points of the cube
+*/
+std::vector<coords3> get_cube_mesh_points(Cube cube) {
+	return {{
+		cube.pos,
+		{cube.pos.x, cube.pos.y, cube.pos.z + 1},
+		{cube.pos.x, cube.pos.y - 1, cube.pos.z},
+		{cube.pos.x, cube.pos.y - 1, cube.pos.z + 1},
+		{cube.pos.x + 1, cube.pos.y, cube.pos.z},
+		{cube.pos.x + 1, cube.pos.y, cube.pos.z + 1},
+		{cube.pos.x + 1, cube.pos.y - 1, cube.pos.z},
+		{cube.pos.x + 1, cube.pos.y - 1, cube.pos.z + 1}
+	}};
 }
 
 /**

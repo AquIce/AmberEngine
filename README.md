@@ -2,7 +2,7 @@
 
 ## Engine
 
-### TODO List (2024.03.25 - 2024.03.25)
+### TODO List (2024.03.25 - 2024.03.26)
 
 - [x] Define cube with points rather than lines
   - [x] Change Cube implementation to use points
@@ -11,7 +11,6 @@
   - [x] Create 3D coordinate struct with x, y, z
   - [x] Add origin property to SDL3Config
   - [x] Add converter using SDL3Config differents sizes
-- [ ] Visible render
-  - [ ] Render only visible dots
-  - [ ] Render only visible lines
-  - [ ] Render only visible faces
+- [x] Visible render
+  - [x] Render only visible dots
+  - [x] Render only visible lines

@@ -34,12 +34,19 @@ int main(int argc, char* argv[]) {
 	);
 
 	// Add cubes to the 3D config
-	add_cube(&config3, {0, 0, 0}, 0, 0, 0, 255);
-	add_cube(&config3, {-1, 0, 0}, 0, 0, 0, 255);
-	add_cube(&config3, {0, 1, 0}, 0, 0, 0, 255);
-	add_cube(&config3, {0, 0, 1}, 0, 0, 0, 255);
-
-	define_mesh_points_visibility(get_objects_mesh_points(&config3));
+	add_cubes(
+		&config3,
+		{
+			{0, 0, 0},
+			{-1, 0, 0},
+			{0, 1, 0},
+			{0, 0, 1},
+			{0, 1, 1},
+			{-1, 0, 1},
+			{-1, 1, 0}
+		},
+		0, 0, 0, 255
+	);
 
 	// Program loop
 	while(config2.running) {

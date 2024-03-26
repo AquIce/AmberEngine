@@ -1,4 +1,6 @@
-# PostSurvivor
+# AmberEngine
+
+**AmberEngine** is my try at the creation of a basic 3D engine displaying only in isometric projection.
 
 ## Engine
 

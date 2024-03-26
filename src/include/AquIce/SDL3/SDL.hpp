@@ -6,6 +6,7 @@
 
 #include "../SDL2/line.hpp"
 #include "../utils/iround.h"
+#include "../utils/ColorCodes.h"
 
 /**
  * @brief The constant PI
@@ -83,21 +84,9 @@ typedef struct Cube {
 	*/
 	coords3 pos;
 	/**
-	 * @brief The red color of the cube
+	 * @brief The RGBA color of the cube
 	*/
-	int r;
-	/**
-	 * @brief The green color of the cube
-	*/
-	int g;
-	/**
-	 * @brief The blue color of the cube
-	*/
-	int b;
-	/**
-	 * @brief The alpha color of the cube
-	*/
-	int a;
+	RGBA rgba;
 } Cube;
 
 /**
@@ -313,13 +302,10 @@ void set_mesh_points_visibility(SDL3_Config* config) {
  * @brief Add a cube to the SDL3 configuration
  * @param config The SDL3 configuration
  * @param position The position of the cube
- * @param r The red color of the cube
- * @param g The green color of the cube
- * @param b The blue color of the cube
- * @param a The alpha color of the cube
+ * @param rbga The RGBA color of the cube
  * @param run_visibility Whether to run the visibility algorithm
 */
-void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a, bool run_visibility = true) {
+void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool run_visibility = true) {
 	MeshPoint* front_down = MeshPoint_new_ptr(position);
 	MeshPoint* back_down = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z});
 	MeshPoint* left_down = MeshPoint_new_ptr({position.x, position.y - 1, position.z});
@@ -358,10 +344,7 @@ void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a,
 				right_up
 			}),
 			position,
-			r,
-			g,
-			b,
-			a
+			rgba
 		}
 	);
 
@@ -374,17 +357,25 @@ void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a,
  * @brief Add cubes to the SDL3 configuration
  * @param config The SDL3 configuration
  * @param positions The positions of the cubes
- * @param r The red color of the cubes
- * @param g The green color of the cubes
- * @param b The blue color of the cubes
- * @param a The alpha color of the cubes
+ * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, int r, int g, int b, int a) {
-	for(auto position : positions) {
-		add_cube(config, position, r, g, b, a, false);
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<RGBA> rgbas) {
+	for(int i = 0; i < positions.size(); i++) {
+		add_cube(config, positions[i], rgbas[i], false);
 	}
 	set_mesh_points_visibility(config);
+}
+
+/**
+ * @brief Add cubes to the SDL3 configuration
+ * @param config The SDL3 configuration
+ * @param positions The positions of the cubes
+ * @param rgba The RGBA color of the cubes
+ * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
+*/
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, RGBA rgba) {
+	add_cubes(config, positions, std::vector<RGBA>(positions.size(), rgba));
 }
 
 /**

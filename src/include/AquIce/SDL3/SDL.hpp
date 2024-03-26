@@ -313,8 +313,11 @@ void draw_objects(SDL_Renderer* renderer, SDL3_Config* config) {
 		std::vector<line> lines = {
 			{cube.vertices[0], cube.vertices[2]},
 			{cube.vertices[0], cube.vertices[3]},
+			{cube.vertices[1], cube.vertices[2]},
+			{cube.vertices[1], cube.vertices[3]},
 
 			{cube.vertices[0], cube.vertices[4]},
+			{cube.vertices[1], cube.vertices[5]},
 			{cube.vertices[2], cube.vertices[6]},
 			{cube.vertices[3], cube.vertices[7]},
 

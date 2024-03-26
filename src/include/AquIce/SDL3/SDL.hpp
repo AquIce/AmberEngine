@@ -90,6 +90,11 @@ typedef struct SDL3_Config {
 	coords origin;
 } SDL3_Config;
 
+typedef struct MeshPoint {
+	coords3 point;
+	bool visible;
+} MeshPoint;
+
 /**
  * @brief Convert degrees to radians
  * @param degangle The angle in degrees
@@ -207,21 +212,29 @@ void add_cube(SDL3_Config* config, coords3 position, int r, int g, int b, int a)
 	);
 }
 
+MeshPoint MeshPoint_new(coords3 point, bool visible) {
+	return {point, visible};
+}
+
+MeshPoint MeshPoint_new(coords3 point) {
+	return MeshPoint_new(point, true);
+}
+
 /**
  * @brief Get the mesh points of a cube
  * @param cube The cube
  * @return The mesh points of the cube
 */
-std::vector<coords3> get_cube_mesh_points(Cube cube) {
+std::vector<MeshPoint> get_cube_mesh_points(Cube cube) {
 	return {{
-		cube.pos,
-		{cube.pos.x, cube.pos.y, cube.pos.z + 1},
-		{cube.pos.x, cube.pos.y - 1, cube.pos.z},
-		{cube.pos.x, cube.pos.y - 1, cube.pos.z + 1},
-		{cube.pos.x + 1, cube.pos.y, cube.pos.z},
-		{cube.pos.x + 1, cube.pos.y, cube.pos.z + 1},
-		{cube.pos.x + 1, cube.pos.y - 1, cube.pos.z},
-		{cube.pos.x + 1, cube.pos.y - 1, cube.pos.z + 1}
+		MeshPoint_new(cube.pos),
+		MeshPoint_new({cube.pos.x, cube.pos.y, cube.pos.z + 1}),
+		MeshPoint_new({cube.pos.x, cube.pos.y - 1, cube.pos.z}),
+		MeshPoint_new({cube.pos.x, cube.pos.y - 1, cube.pos.z + 1}),
+		MeshPoint_new({cube.pos.x + 1, cube.pos.y, cube.pos.z}),
+		MeshPoint_new({cube.pos.x + 1, cube.pos.y, cube.pos.z + 1}),
+		MeshPoint_new({cube.pos.x + 1, cube.pos.y - 1, cube.pos.z}),
+		MeshPoint_new({cube.pos.x + 1, cube.pos.y - 1, cube.pos.z + 1})
 	}};
 }
 

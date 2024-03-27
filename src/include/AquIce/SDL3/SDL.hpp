@@ -51,6 +51,10 @@ typedef struct MeshPoint {
 	 * @brief Whether the point is visible
 	*/
 	bool visible;
+	/**
+	 * @brief Whether the point is see-through
+	*/
+	bool seethrough;
 } MeshPoint;
 
 /**
@@ -87,6 +91,10 @@ typedef struct Cube {
 	 * @brief The RGBA color of the cube
 	*/
 	RGBA rgba;
+	/**
+	 * @brief Whether the cube is see-through
+	*/
+	bool is_seethrough;
 } Cube;
 
 /**
@@ -153,39 +161,26 @@ SDL3_Config SDL3_Config_new(coords origin, int size) {
  * @brief Create a new mesh point pointer
  * @param point The point of the mesh point
  * @param visible Whether the point is visible
+ * @param seethrough Whether the point is see-through
  * @return The mesh point pointer
 */
-MeshPoint* MeshPoint_new_ptr(coords3 point, bool visible) {
+MeshPoint* MeshPoint_new_ptr(coords3 point, bool visible = true, bool seethrough = false) {
 	MeshPoint* mpoint = (MeshPoint*)malloc(sizeof(MeshPoint));
 	mpoint->point = point;
 	mpoint->visible = visible;
+	mpoint->seethrough = seethrough;
 	return mpoint;
-}
-/**
- * @brief Create a new mesh point pointer
- * @param point The point of the mesh point
- * @return The mesh point pointer
-*/
-MeshPoint* MeshPoint_new_ptr(coords3 point) {
-	return MeshPoint_new_ptr(point, true);
 }
 
 /**
  * @brief Create a new mesh point
  * @param point The point of the mesh point
  * @param visible Whether the point is visible
+ * @param seethrough Whether the point is see-through
  * @return The mesh point
 */
-MeshPoint MeshPoint_new(coords3 point, bool visible) {
-	return {point, visible};
-}
-/**
- * @brief Create a new mesh point
- * @param point The point of the mesh point
- * @return The mesh point
-*/
-MeshPoint MeshPoint_new(coords3 point) {
-	return MeshPoint_new(point, true);
+MeshPoint MeshPoint_new(coords3 point, bool visible = true, bool seethrough = false) {
+	return {point, visible, seethrough};
 }
 
 /**
@@ -251,6 +246,15 @@ double vector_multiplicity(coords3 reference, coords3 comparee, bool* is_multipl
 	return x;
 }
 
+MeshPoint* closest_non_seethrough(std::vector<MeshPoint*> mesh_points) {
+	for(int i = mesh_points.size() - 1; i >= 0; i--) {
+		if(!mesh_points[i]->seethrough) {
+			return mesh_points[i];
+		}
+	}
+	return nullptr;
+}
+
 /**
  * @brief Set the visibility of the mesh points
  * @param mesh_points The mesh points
@@ -267,7 +271,7 @@ void set_mesh_points_visibility(std::vector<MeshPoint*> mesh_points) {
 		bool has_multiple = false;
 		for(int j = 0; j < visible_mesh_points.size(); j++) {
 			bool is_multiple;
-			double vmultiple = vector_multiplicity(visible_mesh_points[j].back()->point, mesh_points[i]->point, &is_multiple);
+			double vmultiple = vector_multiplicity(closest_non_seethrough(visible_mesh_points[j])->point, mesh_points[i]->point, &is_multiple);
 			if(is_multiple) {
 				has_multiple = true;
 				if(vmultiple < 0) {
@@ -277,11 +281,19 @@ void set_mesh_points_visibility(std::vector<MeshPoint*> mesh_points) {
 					visible_mesh_points[j].push_back(mesh_points[i]);
 				} else {
 					mesh_points[i]->visible = true;
-					for(auto point : visible_mesh_points[j]) {
-						point->visible = false;
+					if(!mesh_points[i]->seethrough) {
+							for(auto point : visible_mesh_points[j]) {
+							point->visible = false;
+							if(point == closest_non_seethrough(visible_mesh_points[j])) {
+								break;
+							}
+						}
+						visible_mesh_points[j] = std::vector<MeshPoint*>({mesh_points[i]});
+					} else {
+						visible_mesh_points[j].push_back(mesh_points[i]);
 					}
-					visible_mesh_points[j] = std::vector<MeshPoint*>({mesh_points[i]});
 				}
+				break;
 			}
 		}
 		if(!has_multiple) {
@@ -305,15 +317,15 @@ void set_mesh_points_visibility(SDL3_Config* config) {
  * @param rbga The RGBA color of the cube
  * @param run_visibility Whether to run the visibility algorithm
 */
-void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool run_visibility = true) {
-	MeshPoint* front_down = MeshPoint_new_ptr(position);
-	MeshPoint* back_down = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z});
-	MeshPoint* left_down = MeshPoint_new_ptr({position.x, position.y - 1, position.z});
-	MeshPoint* right_down = MeshPoint_new_ptr({position.x + 1, position.y, position.z});
-	MeshPoint* front_up = MeshPoint_new_ptr({position.x, position.y, position.z + 1});
-	MeshPoint* back_up = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z + 1});
-	MeshPoint* left_up = MeshPoint_new_ptr({position.x, position.y - 1, position.z + 1});
-	MeshPoint* right_up = MeshPoint_new_ptr({position.x + 1, position.y, position.z + 1});
+void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool seethrough = false, bool run_visibility = true) {
+	MeshPoint* front_down = MeshPoint_new_ptr(position, true, seethrough);
+	MeshPoint* back_down = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z}, true, seethrough);
+	MeshPoint* left_down = MeshPoint_new_ptr({position.x, position.y - 1, position.z}, true, seethrough);
+	MeshPoint* right_down = MeshPoint_new_ptr({position.x + 1, position.y, position.z}, true, seethrough);
+	MeshPoint* front_up = MeshPoint_new_ptr({position.x, position.y, position.z + 1}, true, seethrough);
+	MeshPoint* back_up = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z + 1}, true, seethrough);
+	MeshPoint* left_up = MeshPoint_new_ptr({position.x, position.y - 1, position.z + 1}, true, seethrough);
+	MeshPoint* right_up = MeshPoint_new_ptr({position.x + 1, position.y, position.z + 1}, true, seethrough);
 
 	config->objects.push_back(
 		{
@@ -360,9 +372,9 @@ void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool run_visibil
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<RGBA> rgbas) {
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<RGBA> rgbas, std::vector<bool> seethroughs){
 	for(int i = 0; i < positions.size(); i++) {
-		add_cube(config, positions[i], rgbas[i], false);
+		add_cube(config, positions[i], rgbas[i], seethroughs[i], false);
 	}
 	set_mesh_points_visibility(config);
 }
@@ -374,8 +386,8 @@ void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, RGBA rgba) {
-	add_cubes(config, positions, std::vector<RGBA>(positions.size(), rgba));
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, RGBA rgba, bool seethrough = false) {
+	add_cubes(config, positions, std::vector<RGBA>(positions.size(), rgba), std::vector<bool>(positions.size(), seethrough));
 }
 
 /**

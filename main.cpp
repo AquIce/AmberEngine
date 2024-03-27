@@ -43,9 +43,11 @@ int main(int argc, char* argv[]) {
 			{0, 0, 1},
 			{0, 1, 1},
 			{-1, 0, 1},
-			{-1, 1, 0}
+			{-1, 1, 0},
+			{-1, 1, 1}
 		},
-		{0, 0, 0, 255}
+		std::vector<RGBA>(8, {0, 0, 0, 255}),
+		std::vector<bool>({false, false, false, false, false, false, false, true})
 	);
 
 	// Program loop

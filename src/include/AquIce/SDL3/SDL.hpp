@@ -2,7 +2,7 @@
 #define __AQUICE_SDL3_SDL_HPP__ 
 
 #include <vector>
-#include <variant>
+#include <algorithm>
 
 #include "../SDL2/line.hpp"
 #include "../utils/iround.h"
@@ -72,17 +72,64 @@ typedef struct MeshLine {
 } MeshLine;
 
 /**
+ * @brief A struct to represent a 2D texture
+*/
+typedef struct Texture {
+	/**
+	 * @brief The size of the texture
+	*/
+	coords size;
+	/**
+	 * @brief The pixels of the texture
+	*/
+	std::vector<std::vector<RGBA>> pixels;
+} Texture;
+
+/**
  * @brief A struct to represent a 2D point
 */
 typedef struct Cube {
 	/**
 	 * @brief The mesh of the cube
+	 * @note The mesh is in the following order:
+	 * @note front_down -> right_down [0]
+	 * @note front_down -> left_down [1]
+	 * @note back_down -> right_down [2]
+	 * @note back_down -> left_do [3]
+	 * @note front_down -> front_up [4]
+	 * @note back_down -> back_up [5]
+	 * @note right_down -> right_up [6]
+	 * @note left_down -> left_up [7]
+	 * @note front_up -> right_up [8]
+	 * @note front_up -> left_up [9]
+	 * @note back_up -> right_up [10]
+	 * @note back_up -> left_up [11]
 	*/
 	std::vector<MeshLine> mesh;
 	/**
 	 * @brief The mesh points of the cube
+	 * @note The mesh points are in the following order:
+	 * @note front_down [0]
+	 * @note back_down [1]
+	 * @note left_down [2]
+	 * @note right_down [3]
+	 * @note front_up [4]
+	 * @note back_up [5]
+	 * @note left_up [6]
+	 * @note right_up [7]
 	*/
 	std::vector<MeshPoint*> mesh_points;
+	/**
+	 * @brief The textures of the cube
+	 * @note The textures are in the following order:
+	 * @note top [0]
+	 * @note bottom [1]
+	 * @note front_left [2]
+	 * @note front_right [3]
+	 * @note back_left [4]
+	 * @note back_right [5]
+	*/
+	std::vector<Texture*> textures;
 	/**
 	 * @brief The position of the cube
 	*/
@@ -158,6 +205,18 @@ SDL3_Config SDL3_Config_new(coords origin, int size) {
 }
 
 /**
+ * @brief Get the default texture size of the configuration
+ * @param config The SDL3 configuration
+ * @return The default texture size
+*/
+coords SDL3_Config_texture_size(SDL3_Config* config) {
+	return {
+		config->adjsize + 1,
+		config->hypsize + 1
+	};
+}
+
+/**
  * @brief Create a new mesh point pointer
  * @param point The point of the mesh point
  * @param visible Whether the point is visible
@@ -191,6 +250,31 @@ MeshPoint MeshPoint_new(coords3 point, bool visible = true, bool seethrough = fa
 */
 MeshLine MeshLine_new(MeshPoint* start, MeshPoint* end) {
 	return {start, end};
+}
+
+/**
+ * @brief Create a new texture using the default texture size
+ * @param config The SDL3 configuration
+ * @param pixels The pixels of the texure
+ * @return The new texture
+*/
+Texture Texture_new(SDL3_Config* config, std::vector<std::vector<RGBA>> pixels) {
+	return {SDL3_Config_texture_size(config), pixels};
+}
+
+/**
+ * @brief Create a new texture
+ * @param config The SDL3 configuration
+ * @param size The size of the texture (in 2D)
+ * @param pixels The pixels of the texure
+ * @return The new texture
+*/
+Texture Texture_new(SDL3_Config* config, coords size, std::vector<std::vector<RGBA>> pixels) {
+	if(pixels.size() == size.y && pixels[0].size() == size.x) {
+		return {size, pixels};
+	} else {
+		return Texture_new(config, pixels);
+	}
 }
 
 /**
@@ -246,6 +330,11 @@ double vector_multiplicity(coords3 reference, coords3 comparee, bool* is_multipl
 	return x;
 }
 
+/**
+ * @brief Get the closest non-see-through MeshPoint from a vector
+ * @param mesh_points The vector of MeshPoints
+ * @return The closest non-see-through MeshPoint
+*/
 MeshPoint* closest_non_seethrough(std::vector<MeshPoint*> mesh_points) {
 	for(int i = mesh_points.size() - 1; i >= 0; i--) {
 		if(!mesh_points[i]->seethrough) {
@@ -317,7 +406,7 @@ void set_mesh_points_visibility(SDL3_Config* config) {
  * @param rbga The RGBA color of the cube
  * @param run_visibility Whether to run the visibility algorithm
 */
-void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool seethrough = false, bool run_visibility = true) {
+void add_cube(SDL3_Config* config, coords3 position, std::vector<Texture*> textures, RGBA rgba, bool seethrough = false, bool run_visibility = true) {
 	MeshPoint* front_down = MeshPoint_new_ptr(position, true, seethrough);
 	MeshPoint* back_down = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z}, true, seethrough);
 	MeshPoint* left_down = MeshPoint_new_ptr({position.x, position.y - 1, position.z}, true, seethrough);
@@ -355,6 +444,7 @@ void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool seethrough 
 				left_up,
 				right_up
 			}),
+			textures,
 			position,
 			rgba
 		}
@@ -372,9 +462,9 @@ void add_cube(SDL3_Config* config, coords3 position, RGBA rgba, bool seethrough 
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<RGBA> rgbas, std::vector<bool> seethroughs){
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::vector<Texture*>> cubes_textures, std::vector<RGBA> rgbas, std::vector<bool> seethroughs){
 	for(int i = 0; i < positions.size(); i++) {
-		add_cube(config, positions[i], rgbas[i], seethroughs[i], false);
+		add_cube(config, positions[i], cubes_textures[i], rgbas[i], seethroughs[i], false);
 	}
 	set_mesh_points_visibility(config);
 }
@@ -386,8 +476,8 @@ void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, RGBA rgba, bool seethrough = false) {
-	add_cubes(config, positions, std::vector<RGBA>(positions.size(), rgba), std::vector<bool>(positions.size(), seethrough));
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::vector<Texture*>> cubes_textures, RGBA rgba, bool seethrough = false) {
+	add_cubes(config, positions, cubes_textures, std::vector<RGBA>(positions.size(), rgba), std::vector<bool>(positions.size(), seethrough));
 }
 
 /**
@@ -404,15 +494,119 @@ void draw_mesh_line(SDL_Renderer* renderer, SDL3_Config* config, MeshLine line) 
 }
 
 /**
+ * @brief Draw the mesh lines of an object
+ * @param renderer The SDL renderer
+ * @param config The SDL3 configuration
+ * @param cube The cube to render the mesh lines of
+*/
+void draw_object_mesh_lines(SDL_Renderer* renderer, SDL3_Config* config, Cube cube) {
+	for(auto mesh_line : cube.mesh) {
+		draw_mesh_line(renderer, config, mesh_line);
+	}
+}
+
+void draw_simple_descending(SDL_Renderer* renderer, SDL3_Config* config, Texture* texture, coords start, coords end) {
+	for(int i = 0; i < texture->pixels.size(); i++) {
+		draw_line(
+			renderer,
+			start,
+			end,
+			texture->pixels[i]
+		);
+		start.y++;
+		end.y++;
+	}
+}
+
+void draw_simple_ascending(SDL_Renderer* renderer, SDL3_Config* config, Texture* texture, coords start, coords end) {
+	for(int i = texture->pixels.size() - 1; i >= 0; i--) {
+		draw_line(
+			renderer,
+			start,
+			end,
+			texture->pixels[i]
+		);
+		start.y++;
+		end.y++;
+	}
+}
+
+void draw_complex_pyramid(SDL_Renderer* renderer, SDL3_Config* config, Texture* texture, coords top, coords left, coords right, coords bottom) {
+	auto first_half_left = linegen(top, left).line_vec;
+	std::reverse(first_half_left.begin(), first_half_left.end()); // For it to be from top to bottom
+	auto first_half_right = linegen(top, right).line_vec;
+	auto second_half_left = linegen(bottom, left).line_vec;
+	auto second_half_right = linegen(bottom, right).line_vec;
+	std::reverse(second_half_right.begin(), second_half_right.end()); // For it to be from top to bottom
+	for(int i = 0; i < first_half_left.size(); i++) {
+		draw_line(renderer, first_half_left[i], first_half_right[i], texture->pixels[i]);
+		draw_line(renderer, second_half_left[i], second_half_right[i], texture->pixels[i]);
+	}
+}
+
+/**
+ * @brief Draw the faces of an object
+ * @param renderer The SDL renderer
+ * @param config The SDL3 configuration
+ * @param cube The cube to render the faces of
+*/
+void draw_object_faces(SDL_Renderer* renderer, SDL3_Config* config, Cube cube) {
+	draw_simple_descending(
+		renderer,
+		config,
+		cube.textures[2],
+		get_2d_coords(cube.mesh_points[4]->point, config),
+		get_2d_coords(cube.mesh_points[6]->point, config)
+	);
+	draw_simple_descending(
+		renderer,
+		config,
+		cube.textures[5],
+		get_2d_coords(cube.mesh_points[7]->point, config),
+		get_2d_coords(cube.mesh_points[5]->point, config)
+	);
+	draw_simple_ascending(
+		renderer,
+		config,
+		cube.textures[4],
+		get_2d_coords(cube.mesh_points[6]->point, config),
+		get_2d_coords(cube.mesh_points[5]->point, config)
+	);
+	draw_simple_ascending(
+		renderer,
+		config,
+		cube.textures[3],
+		get_2d_coords(cube.mesh_points[4]->point, config),
+		get_2d_coords(cube.mesh_points[7]->point, config)
+	);
+	draw_complex_pyramid(
+		renderer,
+		config,
+		cube.textures[0],
+		get_2d_coords(cube.mesh_points[5]->point, config),
+		get_2d_coords(cube.mesh_points[6]->point, config),
+		get_2d_coords(cube.mesh_points[7]->point, config),
+		get_2d_coords(cube.mesh_points[4]->point, config)
+	);
+	draw_complex_pyramid(
+		renderer,
+		config,
+		cube.textures[1],
+		get_2d_coords(cube.mesh_points[1]->point, config),
+		get_2d_coords(cube.mesh_points[2]->point, config),
+		get_2d_coords(cube.mesh_points[3]->point, config),
+		get_2d_coords(cube.mesh_points[0]->point, config)
+	);
+}
+
+/**
  * @brief Draw the lines of the cubes
  * @param renderer The SDL renderer
  * @param config The SDL3 configuration
 */
 void draw_objects(SDL_Renderer* renderer, SDL3_Config* config) {
 	for(auto cube : config->objects) {
-		for(auto mesh_line : cube.mesh) {
-			draw_mesh_line(renderer, config, mesh_line);
-		}
+		draw_object_mesh_lines(renderer, config, cube);
 	}
 }
 

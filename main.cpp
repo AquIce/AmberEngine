@@ -33,6 +33,22 @@ int main(int argc, char* argv[]) {
 		TEXTURE_HEIGHT
 	);
 
+	Texture texture3 = Texture_new(
+		&config3,
+		std::vector<std::vector<RGBA>>(
+			SDL3_Config_texture_size(&config3).y,
+			std::vector<RGBA>(SDL3_Config_texture_size(&config3).x, {255, 0, 0, 255})
+		)
+	);
+
+	Texture texture3_ = Texture_new(
+		&config3,
+		std::vector<std::vector<RGBA>>(
+			200,
+			std::vector<RGBA>(200, {255, 0, 0, 255})
+		)
+	);
+
 	// Add cubes to the 3D config
 	add_cubes(
 		&config3,
@@ -43,9 +59,26 @@ int main(int argc, char* argv[]) {
 			{0, 0, 1},
 			{0, 1, 1},
 			{-1, 0, 1},
-			{-1, 1, 0},
+			{-1, 1, 0},	
 			{-1, 1, 1}
 		},
+		std::vector<std::vector<Texture*>>({
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>(),
+			std::vector<Texture*>({
+				&texture3_,
+				&texture3_,
+				&texture3,
+				&texture3,
+				&texture3,
+				&texture3
+			})
+		}),
 		std::vector<RGBA>(8, {0, 0, 0, 255}),
 		std::vector<bool>({false, false, false, false, false, false, false, true})
 	);
@@ -99,6 +132,7 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(config2.renderer);
 
 		// Draw all the objects from the 3D config
+		draw_object_faces(config2.renderer, &config3, config3.objects.back());
 		draw_objects(config2.renderer, &config3);
 
 		// Set back render target to window (nullptr -> default)

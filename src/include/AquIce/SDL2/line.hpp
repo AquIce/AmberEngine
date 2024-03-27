@@ -3,6 +3,23 @@
 
 #include "../../SDL2/SDL.h"
 #include "../utils/linegen.hpp"
+#include "../utils/ColorCodes.h"
+
+/**
+ * @brief Draw a line
+ * @param renderer The renderer
+ * @param from The starting point
+ * @param to The ending point
+ * @param rgbas The vector of RGBA values
+ * @note The size of the vector should be equal to the number of points in the line
+*/
+void draw_line(SDL_Renderer* renderer, coords from, coords to, std::vector<RGBA> rgbas) {
+	auto line = linegen(from, to).line_vec;
+	for(int i = 0; i < line.size(); i++) {
+		SDL_SetRenderDrawColor(renderer, rgbas[i].r, rgbas[i].g, rgbas[i].b, rgbas[i].a);
+		SDL_RenderDrawPoint(renderer, line[i].x, line[i].y);
+	}
+}
 
 /**
  * @brief Draw a line
@@ -14,11 +31,8 @@
  * @param b The blue value
  * @param a The alpha value
 */
-void draw_line(SDL_Renderer* renderer, coords from, coords to, int r, int g, int b, int a) {
-	SDL_SetRenderDrawColor(renderer, r, g, b, a);
-	for(auto dot : linegen(from, to).line_vec) {
-		SDL_RenderDrawPoint(renderer, dot.x, dot.y);
-	}
+void draw_line(SDL_Renderer* renderer, coords from, coords to, RGBA rgba) {
+	draw_line(renderer, from, to, std::vector<RGBA>(linegen(from, to).line_vec.size(), rgba));
 }
 /**
  * @brief Draw a line
@@ -29,8 +43,8 @@ void draw_line(SDL_Renderer* renderer, coords from, coords to, int r, int g, int
  * @param g The green value
  * @param b The blue value
 */
-void draw_line(SDL_Renderer* renderer, coords from, coords to, int r, int g, int b) {
-	draw_line(renderer, from, to, r, g, b, 255);
+void draw_line(SDL_Renderer* renderer, coords from, coords to, RGB rgb) {
+	draw_line(renderer, from, to, {rgb.r, rgb.g, rgb.b, 255});
 }
 /**
  * @brief Draw a line
@@ -39,7 +53,7 @@ void draw_line(SDL_Renderer* renderer, coords from, coords to, int r, int g, int
  * @param to The ending point
 */
 void draw_line(SDL_Renderer* renderer, coords from, coords to) {
-	draw_line(renderer, from, to, 0, 0, 0, 255);
+	draw_line(renderer, from, to, RGB{0, 0, 0});
 }
 
 #endif

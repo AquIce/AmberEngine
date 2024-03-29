@@ -90,23 +90,6 @@ typedef struct Texture {
 */
 typedef struct Cube {
 	/**
-	 * @brief The mesh of the cube
-	 * @note The mesh is in the following order:
-	 * @note front_down -> right_down [0]
-	 * @note front_down -> left_down [1]
-	 * @note back_down -> right_down [2]
-	 * @note back_down -> left_do [3]
-	 * @note front_down -> front_up [4]
-	 * @note back_down -> back_up [5]
-	 * @note right_down -> right_up [6]
-	 * @note left_down -> left_up [7]
-	 * @note front_up -> right_up [8]
-	 * @note front_up -> left_up [9]
-	 * @note back_up -> right_up [10]
-	 * @note back_up -> left_up [11]
-	*/
-	std::vector<MeshLine> mesh;
-	/**
 	 * @brief The mesh points of the cube
 	 * @note The mesh points are in the following order:
 	 * @note front_down [0]
@@ -315,6 +298,43 @@ std::vector<MeshPoint*> get_objects_mesh_points(SDL3_Config* config) {
 }
 
 /**
+ * @brief Get the mesh lines of a cube
+ * @param cube The cube
+ * @return The mesh lines of the cube
+ * @note The mesh is in the following order:
+ * @note front_down -> right_down [0]
+ * @note front_down -> left_down [1]
+ * @note back_down -> right_down [2]
+ * @note back_down -> left_do [3]
+ * @note front_down -> front_up [4]
+ * @note back_down -> back_up [5]
+ * @note right_down -> right_up [6]
+ * @note left_down -> left_up [7]
+ * @note front_up -> right_up [8]
+ * @note front_up -> left_up [9]
+ * @note back_up -> right_up [10]
+ * @note back_up -> left_up [11]
+*/
+std::vector<MeshLine> get_object_mesh_lines(Cube cube) {
+	return std::vector<MeshLine>({
+		MeshLine_new(cube.mesh_points[0], cube.mesh_points[3]),
+		MeshLine_new(cube.mesh_points[0], cube.mesh_points[2]),
+		MeshLine_new(cube.mesh_points[1], cube.mesh_points[3]),
+		MeshLine_new(cube.mesh_points[1], cube.mesh_points[2]),
+
+		MeshLine_new(cube.mesh_points[0], cube.mesh_points[4]),
+		MeshLine_new(cube.mesh_points[1], cube.mesh_points[5]),
+		MeshLine_new(cube.mesh_points[2], cube.mesh_points[6]),
+		MeshLine_new(cube.mesh_points[3], cube.mesh_points[7]),
+
+		MeshLine_new(cube.mesh_points[4], cube.mesh_points[6]),
+		MeshLine_new(cube.mesh_points[4], cube.mesh_points[7]),
+		MeshLine_new(cube.mesh_points[5], cube.mesh_points[6]),
+		MeshLine_new(cube.mesh_points[5], cube.mesh_points[7]),
+	});
+}
+
+/**
  * @brief Get the multiplicity of a vector
  * @param reference The reference vector
  * @param comparee The vector to compare
@@ -418,22 +438,6 @@ void add_cube(SDL3_Config* config, coords3 position, std::vector<Texture*> textu
 
 	config->objects.push_back(
 		{
-			std::vector<MeshLine>({
-				MeshLine_new(front_down, right_down),
-				MeshLine_new(front_down, left_down),
-				MeshLine_new(back_down, right_down),
-				MeshLine_new(back_down, left_down),
-
-				MeshLine_new(front_down, front_up),
-				MeshLine_new(back_down, back_up),
-				MeshLine_new(right_down, right_up),
-				MeshLine_new(left_down, left_up),
-
-				MeshLine_new(front_up, right_up),
-				MeshLine_new(front_up, left_up),
-				MeshLine_new(back_up, right_up),
-				MeshLine_new(back_up, left_up),
-			}),
 			std::vector<MeshPoint*>({
 				front_down,
 				back_down,
@@ -500,7 +504,7 @@ void draw_mesh_line(SDL_Renderer* renderer, SDL3_Config* config, MeshLine line) 
  * @param cube The cube to render the mesh lines of
 */
 void draw_object_mesh_lines(SDL_Renderer* renderer, SDL3_Config* config, Cube cube) {
-	for(auto mesh_line : cube.mesh) {
+	for(auto mesh_line : get_object_mesh_lines(cube)) {
 		draw_mesh_line(renderer, config, mesh_line);
 	}
 }

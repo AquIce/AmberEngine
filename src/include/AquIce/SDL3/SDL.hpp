@@ -2,6 +2,7 @@
 #define __AQUICE_SDL3_SDL_HPP__ 
 
 #include <vector>
+#include <array>
 #include <algorithm>
 
 #include "../SDL2/line.hpp"
@@ -19,7 +20,7 @@
 /**
  * @brief The vector from the scene to the camera (to calculate hidden mesh points)
 */
-#define SCENE_TO_CAM_VEC std::vector<int>({-1, 1, 1})
+#define SCENE_TO_CAM_VEC std::array<int, 3>({-1, 1, 1})
 
 /**
  * @brief A struct to represent a 3D point
@@ -101,7 +102,7 @@ typedef struct Cube {
 	 * @note left_up [6]
 	 * @note right_up [7]
 	*/
-	std::vector<MeshPoint*> mesh_points;
+	std::array<MeshPoint*, 8> mesh_points;
 	/**
 	 * @brief The textures of the cube
 	 * @note The textures are in the following order:
@@ -112,7 +113,7 @@ typedef struct Cube {
 	 * @note back_left [4]
 	 * @note back_right [5]
 	*/
-	std::vector<Texture*> textures;
+	std::array<Texture*, 6> textures;
 	/**
 	 * @brief The position of the cube
 	*/
@@ -291,7 +292,7 @@ coords get_2d_coords(coords3 p, SDL3_Config* config) {
 std::vector<MeshPoint*> get_objects_mesh_points(SDL3_Config* config) {
 	std::vector<MeshPoint*> mesh_points = std::vector<MeshPoint*>();
 	for(auto cube : config->objects) {
-		std::vector<MeshPoint*> cube_mesh_points = cube.mesh_points;
+		std::array<MeshPoint*, 8> cube_mesh_points = cube.mesh_points;
 		mesh_points.insert(mesh_points.end(), cube_mesh_points.begin(), cube_mesh_points.end());
 	}
 	return mesh_points;
@@ -426,7 +427,7 @@ void set_mesh_points_visibility(SDL3_Config* config) {
  * @param rbga The RGBA color of the cube
  * @param run_visibility Whether to run the visibility algorithm
 */
-void add_cube(SDL3_Config* config, coords3 position, std::vector<Texture*> textures, RGBA rgba, bool seethrough = false, bool run_visibility = true) {
+void add_cube(SDL3_Config* config, coords3 position, std::array<Texture*, 6> textures, RGBA rgba, bool seethrough = false, bool run_visibility = true) {
 	MeshPoint* front_down = MeshPoint_new_ptr(position, true, seethrough);
 	MeshPoint* back_down = MeshPoint_new_ptr({position.x + 1, position.y - 1, position.z}, true, seethrough);
 	MeshPoint* left_down = MeshPoint_new_ptr({position.x, position.y - 1, position.z}, true, seethrough);
@@ -438,7 +439,7 @@ void add_cube(SDL3_Config* config, coords3 position, std::vector<Texture*> textu
 
 	config->objects.push_back(
 		{
-			std::vector<MeshPoint*>({
+			std::array<MeshPoint*, 8>({
 				front_down,
 				back_down,
 				left_down,
@@ -466,7 +467,7 @@ void add_cube(SDL3_Config* config, coords3 position, std::vector<Texture*> textu
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::vector<Texture*>> cubes_textures, std::vector<RGBA> rgbas, std::vector<bool> seethroughs){
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::array<Texture*, 6>> cubes_textures, std::vector<RGBA> rgbas, std::vector<bool> seethroughs){
 	for(int i = 0; i < positions.size(); i++) {
 		add_cube(config, positions[i], cubes_textures[i], rgbas[i], seethroughs[i], false);
 	}
@@ -480,7 +481,7 @@ void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<
  * @param rgba The RGBA color of the cubes
  * @note This function is a wrapper for the add_cube function but adds a layer of optimization by running the visibility algorithm only once.
 */
-void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::vector<Texture*>> cubes_textures, RGBA rgba, bool seethrough = false) {
+void add_cubes(SDL3_Config* config, std::vector<coords3> positions, std::vector<std::array<Texture*, 6>> cubes_textures, RGBA rgba, bool seethrough = false) {
 	add_cubes(config, positions, cubes_textures, std::vector<RGBA>(positions.size(), rgba), std::vector<bool>(positions.size(), seethrough));
 }
 

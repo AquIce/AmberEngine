@@ -1,6 +1,4 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
 
 #include <SDL2/SDL.h>
 #include <AquIce/SDL2/SDL.h>
@@ -62,15 +60,15 @@ int main(int argc, char* argv[]) {
 			{-1, 1, 0},	
 			{-1, 1, 1}
 		},
-		std::vector<std::vector<Texture*>>({
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>(),
-			std::vector<Texture*>({
+		std::vector<std::array<Texture*, 6>>({
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>(),
+			std::array<Texture*, 6>({
 				&texture3_,
 				&texture3_,
 				&texture3,

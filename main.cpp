@@ -13,7 +13,7 @@ const int TEXTURE_HEIGHT = 2000;
 int main(int argc, char* argv[]) {
 	// Initialize SDL
 	auto config2 = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
-	auto config3 = SDL3_Config_new({200, 300}, 100);
+	auto config3 = SDL3_Config_new({200, 300}, 100, {-1, 1, 1});
 	
 	// Create an event
 	SDL_Event event;
@@ -29,56 +29,6 @@ int main(int argc, char* argv[]) {
 		SDL_TEXTUREACCESS_TARGET,
 		TEXTURE_WIDTH,
 		TEXTURE_HEIGHT
-	);
-
-	Texture texture3 = Texture_new(
-		&config3,
-		std::vector<std::vector<RGBA>>(
-			SDL3_Config_texture_size(&config3).y,
-			std::vector<RGBA>(SDL3_Config_texture_size(&config3).x, {255, 0, 0, 255})
-		)
-	);
-
-	Texture texture3_ = Texture_new(
-		&config3,
-		std::vector<std::vector<RGBA>>(
-			200,
-			std::vector<RGBA>(200, {255, 0, 0, 255})
-		)
-	);
-
-	// Add cubes to the 3D config
-	add_cubes(
-		&config3,
-		{
-			{0, 0, 0},
-			{-1, 0, 0},
-			{0, 1, 0},
-			{0, 0, 1},
-			{0, 1, 1},
-			{-1, 0, 1},
-			{-1, 1, 0},	
-			{-1, 1, 1}
-		},
-		std::vector<std::array<Texture*, 6>>({
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>(),
-			std::array<Texture*, 6>({
-				&texture3_,
-				&texture3_,
-				&texture3,
-				&texture3,
-				&texture3,
-				&texture3
-			})
-		}),
-		std::vector<RGBA>(8, {0, 0, 0, 255}),
-		std::vector<bool>({false, false, false, false, false, false, false, true})
 	);
 
 	// Program loop
@@ -130,8 +80,6 @@ int main(int argc, char* argv[]) {
 		SDL_RenderClear(config2.renderer);
 
 		// Draw all the objects from the 3D config
-		draw_object_faces(config2.renderer, &config3, config3.objects.back());
-		draw_objects(config2.renderer, &config3);
 
 		// Set back render target to window (nullptr -> default)
 		SDL_SetRenderTarget(config2.renderer, nullptr);

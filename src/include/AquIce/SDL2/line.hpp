@@ -8,17 +8,27 @@
 /**
  * @brief Draw a line
  * @param renderer The renderer
+ * @param l The line
+ * @param rgbas The vector of RGBA values
+ * @note The size of the vector should be equal to the number of points in the line
+*/
+void draw_line(SDL_Renderer* renderer, line l, std::vector<RGBA> rgbas) {
+	for(int i = 0; i < l.line_vec.size(); i++) {
+		SDL_SetRenderDrawColor(renderer, rgbas[i].r, rgbas[i].g, rgbas[i].b, rgbas[i].a);
+		SDL_RenderDrawPoint(renderer, l.line_vec[i].x, l.line_vec[i].y);
+	}
+}
+
+/**
+ * @brief Draw a line
+ * @param renderer The renderer
  * @param from The starting point
  * @param to The ending point
  * @param rgbas The vector of RGBA values
  * @note The size of the vector should be equal to the number of points in the line
 */
 void draw_line(SDL_Renderer* renderer, coords from, coords to, std::vector<RGBA> rgbas) {
-	auto line = linegen(from, to).line_vec;
-	for(int i = 0; i < line.size(); i++) {
-		SDL_SetRenderDrawColor(renderer, rgbas[i].r, rgbas[i].g, rgbas[i].b, rgbas[i].a);
-		SDL_RenderDrawPoint(renderer, line[i].x, line[i].y);
-	}
+	draw_line(renderer, linegen(from, to), rgbas);
 }
 
 /**

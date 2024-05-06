@@ -1,12 +1,12 @@
-#ifndef __AQUICE_SDL2_SDL_H__
-#define __AQUICE_SDL2_SDL_H__
+#ifndef __AQUICE_SDL2_SDL_HPP__
+#define __AQUICE_SDL2_SDL_HPP__
 
 #include "../../SDL2/SDL.h"
 
 /**
  * @brief The configuration for the SDL2 library
 */
-typedef struct AquIce_SDL_Config {
+typedef struct AquIce_SDL2_Config {
 	/**
 	 * @brief The window to render to
 	*/
@@ -23,7 +23,7 @@ typedef struct AquIce_SDL_Config {
 	 * @brief The scale of the window
 	*/
 	int scale;
-} AquIce_SDL_Config;
+} AquIce_SDL2_Config;
 
 /**
  * @brief Set up the SDL2 library
@@ -33,7 +33,7 @@ typedef struct AquIce_SDL_Config {
  * @param scale The scale of the window
  * @return The configuration for the SDL2 library
 */
-AquIce_SDL_Config AquIce_SDL_Setup(const char* title, int width, int height, int scale) {
+AquIce_SDL2_Config AquIce_SDL2_Setup(const char* title, int width, int height, int scale) {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	auto window = SDL_CreateWindow(
 		title,
@@ -60,7 +60,7 @@ AquIce_SDL_Config AquIce_SDL_Setup(const char* title, int width, int height, int
 /**
  * @brief Set the scale of the window
 */
-void AquIce_SDL_SetScale(AquIce_SDL_Config* config) {
+void AquIce_SDL2_SetScale(AquIce_SDL2_Config* config) {
 	SDL_RenderSetScale(
 		config->renderer,
 		config->scale,
@@ -76,7 +76,7 @@ void AquIce_SDL_SetScale(AquIce_SDL_Config* config) {
  * @param b The blue value
  * @param a The alpha value
 */
-void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b, int a) {
+void AquIce_SDL2_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b, int a) {
 	SDL_SetRenderDrawColor(renderer, r, g, b, a);
 	SDL_RenderClear(renderer);
 }
@@ -87,15 +87,15 @@ void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b, int a
  * @param g The green value
  * @param b The blue value
 */
-void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b) {
-	AquIce_SDL_ClearRenderer(renderer, r, g, b, 255);
+void AquIce_SDL2_ClearRenderer(SDL_Renderer* renderer, int r, int g, int b) {
+	AquIce_SDL2_ClearRenderer(renderer, r, g, b, 255);
 }
 /**
  * @brief Clear the renderer
  * @param renderer The renderer to clear
 */
-void AquIce_SDL_ClearRenderer(SDL_Renderer* renderer) {
-	AquIce_SDL_ClearRenderer(renderer, 0, 0, 0);
+void AquIce_SDL2_ClearRenderer(SDL_Renderer* renderer) {
+	AquIce_SDL2_ClearRenderer(renderer, 0, 0, 0);
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <SDL2/SDL.h>
-#include <AquIce/SDL2/SDL.h>
+#include <AquIce/SDL2/SDL.hpp>
 #include <AquIce/SDL3/SDL.hpp>
 
 const int SCREEN_WIDTH = 1000;
@@ -12,15 +12,15 @@ const int TEXTURE_HEIGHT = 2000;
 
 int main(int argc, char* argv[]) {
 	// Initialize SDL
-	auto config2 = AquIce_SDL_Setup("SDL Texture", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
+	auto config2 = AquIce_SDL2_Setup("Amber Engine", SCREEN_WIDTH, SCREEN_HEIGHT, 1);
 	auto config3 = SDL3_Config_new({200, 300}, 100, {-1, 1, 1});
 	
 	// Create an event
 	SDL_Event event;
 
 	// Create source and destination rectangles
-	SDL_Rect source{0, 0, SCREEN_WIDTH / 32, SCREEN_HEIGHT / 32};
-	SDL_Rect dest{10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20};
+	SDL_Rect source = {0, 0, SCREEN_WIDTH / 32, SCREEN_HEIGHT / 32};
+	SDL_Rect dest = {10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20};
 
 	// Create a texture
 	SDL_Texture* texture = SDL_CreateTexture(
@@ -69,10 +69,10 @@ int main(int argc, char* argv[]) {
 		}
 
 		// Set render scale (zoom)
-		AquIce_SDL_SetScale(&config2);
+		AquIce_SDL2_SetScale(&config2);
 
 		// Clear screen
-		AquIce_SDL_ClearRenderer(config2.renderer);
+		AquIce_SDL2_ClearRenderer(config2.renderer);
 
 		// Clear the texture
 		SDL_SetRenderTarget(config2.renderer, texture);

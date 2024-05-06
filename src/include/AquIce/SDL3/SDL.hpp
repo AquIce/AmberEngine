@@ -13,14 +13,6 @@
  * @brief The constant PI
 */
 #define PI 3.14159265358979323846
-/**
- * @brief The angle for the perspective
-*/
-#define P_ANGLE 30
-/**
- * @brief The vector from the scene to the camera (to calculate hidden mesh points)
-*/
-#define SCENE_TO_CAM_VEC std::array<int, 3>({-1, 1, 1})
 
 /**
  * @brief A struct to represent a 3D point
@@ -156,92 +148,6 @@ MeshPoint MeshPoint_new(coords3 point, bool visible = true, bool seethrough = fa
 */
 MeshLine MeshLine_new(MeshPoint* start, MeshPoint* end) {
 	return {start, end};
-}
-
-/**
- * @brief Get the multiplicity of a vector
- * @param reference The reference vector
- * @param comparee The vector to compare
- * @param is_multiple Whether the vectors are multiples
- * @return The multiplicity of the vector
- * @note multiplicity * SCENE_TO_CAM_VEC + reference = comparee
-*/
-double vector_multiplicity(coords3 reference, coords3 comparee, bool* is_multiple) {
-	double x = (double)(comparee.x - reference.x) / SCENE_TO_CAM_VEC[0];
-	double y = (double)(comparee.y - reference.y) / SCENE_TO_CAM_VEC[1];
-	double z = (double)(comparee.z - reference.z) / SCENE_TO_CAM_VEC[2];
-	*is_multiple = x == y && y == z;
-	return x;
-}
-
-/**
- * @brief Get the closest non-see-through MeshPoint from a vector
- * @param mesh_points The vector of MeshPoints
- * @return The closest non-see-through MeshPoint
-*/
-MeshPoint* closest_non_seethrough(std::vector<MeshPoint*> mesh_points) {
-	for(int i = mesh_points.size() - 1; i >= 0; i--) {
-		if(!mesh_points[i]->seethrough) {
-			return mesh_points[i];
-		}
-	}
-	return nullptr;
-}
-
-/**
- * @brief Set the visibility of the mesh points
- * @param mesh_points The mesh points
- * @note The algorithm is based on the fact that you can use the vector_multiplicity function to determine if a point aligned with another in relation to the camera.
- * @note If the multiplicity is negative, the point is hidden by the other point.
- * @note If the multiplicity is zero, the point is visible and the other point is also visible (they are the same point).
- * @note If the multiplicity is positive, the point is visible and the other point is hidden.
-*/
-void set_mesh_points_visibility(std::vector<MeshPoint*> mesh_points) {
-	std::vector<std::vector<MeshPoint*>> visible_mesh_points = std::vector<std::vector<MeshPoint*>>({
-		std::vector<MeshPoint*>({mesh_points[0]})
-	});
-	for(int i = 1; i < mesh_points.size(); i++) {
-		bool has_multiple = false;
-		for(int j = 0; j < visible_mesh_points.size(); j++) {
-			bool is_multiple;
-			double vmultiple = vector_multiplicity(closest_non_seethrough(visible_mesh_points[j])->point, mesh_points[i]->point, &is_multiple);
-			if(is_multiple) {
-				has_multiple = true;
-				if(vmultiple < 0) {
-					mesh_points[i]->visible = false;
-				} else if(vmultiple == 0) {
-					mesh_points[i]->visible = true;
-					visible_mesh_points[j].push_back(mesh_points[i]);
-				} else {
-					mesh_points[i]->visible = true;
-					if(!mesh_points[i]->seethrough) {
-							for(auto point : visible_mesh_points[j]) {
-							point->visible = false;
-							if(point == closest_non_seethrough(visible_mesh_points[j])) {
-								break;
-							}
-						}
-						visible_mesh_points[j] = std::vector<MeshPoint*>({mesh_points[i]});
-					} else {
-						visible_mesh_points[j].push_back(mesh_points[i]);
-					}
-				}
-				break;
-			}
-		}
-		if(!has_multiple) {
-			visible_mesh_points.push_back(std::vector<MeshPoint*>({mesh_points[i]}));
-		}
-	}
-}
-
-/**
- * @brief Set the visibility of the mesh points in the SDL3 configuration
- * @param config The SDL3 configuration
-*/
-void set_mesh_points_visibility(SDL3_Config* config) {
-	// Replace with the actual mesh points
-	set_mesh_points_visibility(std::vector<MeshPoint*>());
 }
 
 /**
